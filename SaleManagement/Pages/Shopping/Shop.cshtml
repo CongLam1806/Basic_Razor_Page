@@ -1,0 +1,275 @@
+﻿@page "/"
+@using SaleManagement.Utilities
+@model SaleManagement.Pages.Shopping.ShopModel
+@{
+    var isAdmin = SessionHelper.IsAdmin(HttpContext.Session);
+}
+@* <link rel="stylesheet" href="~/css/shop.css" asp-append-version="true" /> *@
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+   
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,400;0,700;1,200&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="css/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="css/tooplate-kool-form-pack.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <main>
+
+        <section class="hero-section d-flex justify-content-center align-items-center">
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col-lg-12 p-5 bg-white rounded shadow-sm mb-5">
+                            <div class="text-info">@TempData["MessageCheckout"]</div>
+                            <div class="text-info">@TempData["MessageCreateProduct"]</div>
+                            <div class="header-nav d-flex justify-content-between align-items-center">
+                                <div class="title">
+                                    <h1>Shopping Cart</h1>
+                                </div>
+                                <form class="nav-item d-flex" method="get">
+                                    <input type="text" name="searchValue" value="@TempData["search"]" />
+                                    <div class="ps-2">
+                                        <button href="/" class="btn btn-primary">Search</button>
+                                        @if(!isAdmin) {
+                                            <a href="/checkout" class="btn btn-secondary"><i class="fa-solid fa-cart-shopping"></i></a>
+                                        <a href="/history?handler=HistoryOrderUser" class="btn btn-secondary"><i class="fa-solid fa-calendar-days"></i></a>
+                                        } else
+                                        {
+                                        <button id="btn-product" type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        <a href="/history?handler=HistoryOrderAdmin" class="btn btn-secondary"><i class="fa-solid fa-calendar-days"></i></a>
+                                        }
+
+                                        <a href="/login?handler=Logout" class="btn btn-primary">Logout</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Shopping cart table -->
+                            <div class="table-responsive navbar-nav-scroll">
+                                <table class="table text-center">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="border-0 bg-light">
+                                                <div class="p-2 text-uppercase">Product</div>
+                                            </th>
+                                            <th scope="col" class="border-0 bg-light">
+                                                <div class="py-2 text-uppercase">Weight <span class="text-lowercase">(g)</span></div>
+                                            </th>
+                                            <th scope="col" class="border-0 bg-light">
+                                                <div class="py-2 text-uppercase">Category</div>
+                                            </th>
+                                            <th scope="col" class="border-0 bg-light">
+                                                <div class="py-2 text-uppercase">Price (VND)</div>
+                                            </th>
+                                            <th scope="col" class="border-0 bg-light">
+                                                <div class="py-2 text-uppercase">Quantity</div>
+                                            </th>
+                                            <th scope="col" class="border-0 bg-light">
+                                                <div class="py-2 text-uppercase">Action</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            foreach (var item in Model.Products)
+                                            {
+                                                    <tr>
+                                                       <form>
+                                                        <td class="d-none product-id"><strong>@item.ProductId</strong></td>
+                                                        <td class="border-0 align-middle product-name"><strong>@item.ProductName</strong></td>
+                                                        <td class="border-0 align-middle weight"><strong>@item.Weight</strong></td>
+                                                        <td class="border-0 align-middle category-id"><strong>@item.CategoryId</strong></td>
+                                                        <td class="border-0 align-middle unit-price"><strong>@item.UnitPrice.ToString().Split(".")[0]</strong></td>
+                                                        <td class="border-0 align-middle units-in-stock"><strong>@item.UnitsInStock</strong></td>
+                                                            <td class="border-0 align-middle">
+
+                                                                    @{
+                                                                    if (!isAdmin)
+                                                                    {
+                                                                            <a href="?handler=AddToCart&ProductId=@item.ProductId" class="text-dark" style="padding-right: 0.6rem">
+                                                                                <i class="fa-solid fa-cart-plus"></i>
+                                                                            </a>
+
+                                                                    } else
+                                                                    {
+                                                                            <a href="?handler=DeleteProduct&productId=@item.ProductId" class="text-danger" style="padding-left: 0.6rem">
+                                                                                <i class="fa fa-trash"></i>
+                                                                            </a>
+                                                                            <a href="#" class="text-warning edit-link" style="padding-left: 0.6rem">
+                                                                                <i class="fa-solid fa-pen-to-square"></i>
+                                                                            </a>
+                                                                    }
+                                                                    }
+
+
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- End -->
+                        </div>
+                    </div>
+
+                </div>
+            <div class="video-wrap">
+                <video autoplay="" loop="" muted="" class="custom-video" poster="">
+                    <source src="videos/background.mp4" type="video/mp4">
+
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/init.js"></script>
+
+    <style>
+        .modal-content .background-shape {
+            display: none; /* Hide the unwanted shape */
+        }
+    </style>
+</body>
+
+@{
+    if (isAdmin)
+    {
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header" style="background-color: white">
+                        <h5 class="modal-title" style="margin-left: 203px" id="exampleModalLabel">Product</h5>
+                            <button type="button" class="btn-close" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="background-color: white">
+                            <form class="form-create-product row flex-column gap-4 align-items-center" method="post" name="form">
+                                <input type="hidden" asp-for="Product.ProductId" />
+                                <div class="row col">
+                                    <label class="col-md-4" for="email">Product Name</label>
+                                    <input class="form-styling col-md-8" type="text" asp-for="Product.ProductName" />
+                                </div>
+
+                                <div class="row col justify-content-evenly">
+
+                                    <div class="row col-md-5">
+                                        <label for="fullname">Weight</label>
+                                        <input class="form-styling" type="text" asp-for="Product.Weight" />
+                                    </div>
+
+                                    <div class="row col-md-5">
+                                        <label for="dlno">Category</label>
+                                        <select asp-for="Product.CategoryId">
+                                            <option value="1">Laptop</option>
+                                            <option value="2">PC</option>
+                                            <option value="3">Accessory</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row col justify-content-evenly">
+                                
+                                    <div class="row col-md-5">
+                                        <label class="" for="dlno">Unit Price</label>
+                                        <input class="form-styling " type="number" asp-for="Product.UnitPrice" />
+                                    </div>
+
+                                    <div class="row col-md-5">
+                                        <label class="" for="dlno">Unit In stock</label>
+                                        <input class="form-styling" type="number" asp-for="Product.UnitsInStock" />
+                                    </div>
+
+                                    
+                                </div>
+
+                                <button ng-click="checked = !checked" id="btn-create-product" class="btn btn-success" asp-page-handler="CreateProduct">Save Change</button>
+                            <button ng-click="checked = !checked" id="btn-update-product" class="btn btn-success" asp-page-handler="UpdateProduct">Save Change</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    }
+}
+
+
+<script>
+    // Get all the edit links
+    const editLinks = document.querySelectorAll('.edit-link');
+
+    document.getElementById("btn-product").addEventListener('click', () => {
+        // Change the button
+        document.getElementById("btn-create-product").classList.remove("d-none");
+        document.getElementById("btn-update-product").classList.add("d-none");
+    });
+
+    // Iterate over each edit link
+    editLinks.forEach((link) => {
+        // Attach click event handler
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Get the parent form element
+            const form = document.querySelector('.form-create-product');
+
+            // Get the input elements within the form
+            const inputs = form.querySelectorAll('input, select');
+
+            // Get the corresponding data from the current item in the loop
+            const productId = link.closest('tr').querySelector('.product-id').textContent;
+            const productName = link.closest('tr').querySelector('.product-name').textContent;
+            const weight = link.closest('tr').querySelector('.weight').textContent;
+            const categoryId = link.closest('tr').querySelector('.category-id').textContent;
+            const unitPrice = link.closest('tr').querySelector('.unit-price').textContent;
+            const unitsInStock = link.closest('tr').querySelector('.units-in-stock').textContent;
+
+            // Set the input values with the corresponding data
+            inputs[0].value = productId;
+            inputs[1].value = productName;
+            inputs[2].value = weight;
+            inputs[3].value = categoryId;
+            inputs[4].value = unitPrice;
+            inputs[5].value = unitsInStock;
+
+            // Trigger the modal to open
+            // Get the modal element
+            const modal = document.getElementById('exampleModal');
+
+            // Trigger the modal to show
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
+
+            // Change the button
+            document.getElementById("btn-create-product").classList.add("d-none");
+            document.getElementById("btn-update-product").classList.remove("d-none");
+        });
+    });
+</script>

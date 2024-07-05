@@ -1,0 +1,171 @@
+﻿@page "/checkout"
+@using SaleManagement.Utilities
+@using SaleManagement.BusinessObject.Constants
+@using SaleManagement.BusinessObject.Entity
+@using SaleManagement.BusinessObject.DataTransfer
+@using ShoppingCart.BusinessObject.Constants
+
+@model SaleManagement.Pages.Shopping.CheckOutModel
+@{
+    var carts = SessionHelper.GetSession<IEnumerable<OrderDetail>>(HttpContext.Session, SessionConstant.CartSession) ?? new List<OrderDetail>();
+    var shipping = SessionHelper.GetSession<ObjectData>(HttpContext.Session, SessionConstant.Shipping);
+    var discount = SessionHelper.GetSession<int>(HttpContext.Session, SessionConstant.Discount);
+
+    var totalItem = carts.Sum(x => x.Quantity);
+    var totalMoney = carts.Sum(x => x.Quantity * x.UnitPrice);
+    var totalPrice = (totalMoney + shipping?.Value) - ((totalMoney + shipping?.Value) * discount / 100);
+    var freight = SessionHelper.GetSession<int>(HttpContext.Session, SessionConstant.Freight);
+}
+
+@* <link rel="stylesheet" href="~/css/check-out.css" asp-append-version="true" /> *@
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,400;0,700;1,200&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="css/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="css/tooplate-kool-form-pack.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <main>
+
+        <section class="hero-section d-flex justify-content-center align-items-center">
+            <div class="container" style="background-color:white; height: 110%; border-radius: 15px; padding: 40px">
+                <div class="row">
+                    <div class="col-md-8 cart">
+                        <div class="title">
+                            <div class="row">
+                                <div class="col"><h4><b style ="font-size: 140%">Shopping Cart</b></h4></div>
+                                <div class="col align-self-center text-right text-muted">@carts!.Count() items</div>
+                            </div>
+                        </div>
+                        <div class="row border-top border-bottom" style="padding-left: 17px">
+                            @{
+                                foreach(var item in carts!.ToList())
+                                {
+                                    <form class="row main align-items-center text-center" method="post">
+                                        @* <div class="col-2"><img class="img-fluid" src="https://i.imgur.com/1GrakTl.jpg"></div> *@
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <div class="col">
+                                            <div class="row text-muted">@item.Product.CategoryId</div>
+                                            <div class="row">@item.Product.ProductName</div>
+                                        </div>
+                                        <div class="col-3 d-flex align-item-ce" style="margin-right: 20px" >
+                                            <button class="btn-unit border" asp-page-handler="DownUnit">-</button>
+                                            <input href="#" class="border amount-product" style="text-align:center" value="@item.Quantity" readonly />
+                                            <button class="btn-unit border" asp-page-handler="UpUnit" >+</button>
+                                        </div>
+                                        <div class="col-3" style="margin-left: 40px">@item.UnitPrice.ToString().Split(".")[0] <span>Dong</span> </div>
+                                        <div class="col-1"><button class="close border-0 bg-transparent" asp-page-handler="Delete">&#10005;</button></div>
+                                    </form>
+                                }
+                            }
+                
+                        </div>
+                        <div class="back-to-shop"><a href="/"><span class="btn btn-warning" style="margin-top: 20px; color: white"> Back to shop</span></a></div>
+                    </div>
+                    <div class="col-md-4 summary" style="text-align: center">
+                        <div><h5><b>Summary</b></h5></div>
+                        <hr>
+            
+                        <form method="post" id="myForm" asp-page-handler="ApplyShipping">
+                            <p>SHIPPING</p>
+                            <select id="shippingSelect" name="shippingId">
+                                @foreach (var item in Data.Shippings)
+                                {
+                                    <option value="@item.Id" class="text-muted" selected="@(shipping?.Id == item.Id)">@item.Name</option>
+                                }
+
+                            </select>
+                        </form>
+
+                        <form method="post" asp-page-handler="ApplyVoucher" style="margin-bottom: 20px">
+                            @* <p>SHIPPING</p>
+                            <select>
+                                @foreach(var item in Data.Shippings)
+                                {
+                                    <option value="@item.Id" class="text-muted">@item.Name</option>
+                                }
+                    
+                            </select> *@
+                            <p style="margin-top: 20px">GIVE CODE </p>
+                            <span class="error-code" style="color: red">@TempData["Message"]</span>
+                            <div class="position-relative">
+                                <input id="code" placeholder="Enter your code" name="code" value="">
+                                <button class="discount-code btn btn-primary">Apply code</button>
+                            </div>
+                        </form>
+
+                        <div class="row" style="margin-bottom: 0.3rem; text-align: left; margin-left: 32px">
+                            <div class="col" style="padding-left:0;">Total Items: </div>
+                            <div class="col text-right">@totalItem <span>item</span></div>
+                        </div>
+                        <div class="row" style="margin-bottom: 0.3rem; text-align: left; margin-left: 32px">
+                            <div class="col" style="padding-left:0;">Total Money: </div>
+                            <div class="col text-right">@totalMoney.ToString().Split(".")[0] <span>Dong</span></div>
+                        </div>
+                        <div class="row" style="margin-bottom: 0.3rem; text-align: left; margin-left: 32px">
+                            <div class="col" style="padding-left:0;">Discount: </div>
+                            <div class="col text-right">@discount <span>%</span></div>
+                        </div>
+                        <div class="row" style="margin-bottom: 2vh; text-align: left; margin-left: 32px">
+                            <div class="col" style="padding-left:0;">Shipping: </div>
+                            <div class="col text-right">@shipping?.Value <span>Dong</span></div>
+                        </div>
+
+                        <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
+                            <div class="col text-md-start" style="padding-left:0; margin-left: 42px"><b>Total Price:</b></div>
+                            <div class="col text-right"><b>@totalPrice.ToString().Split(".")[0] <span>Dong</span></b></div>
+                        </div>
+
+                        <span class="error-code m-0">@TempData["MessageCheckout"]</span>
+                        <a href="/checkout?handler=checkout" class="btn btn-success"><b>CHECKOUT</b></a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="video-wrap">
+                <video autoplay="" loop="" muted="" class="custom-video" poster="">
+                    <source src="videos/background.mp4" type="video/mp4">
+
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </section>
+    </main>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/init.js"></script>
+
+</body>
+
+
+<script>
+    document.getElementById("shippingSelect").addEventListener("change", function () {
+        document.getElementById("myForm").submit();
+    });
+
+    
+
+</script>
